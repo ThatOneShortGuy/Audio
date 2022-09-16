@@ -6,9 +6,9 @@
 
 This is the most used program part of this package I use personally.
 
-[Quick Start](##quick-start)
+[Quick Start](#quick-start)
 
-[Advanced Guide](##advanced-guide)
+[Advanced Guide](#advanced-guide)
 
 ## Quick Start
 ### Requirements
@@ -35,12 +35,12 @@ Genius will request you use your token ID. Go to [Genius](https://genius.com/api
 it will store it in a file named "genius_token.txt" wherever the program is stored so you won't have to enter it again.
 
 ## Advanced Guide
-Ensure you have the modules as stated in the [Quick Start Requirements](###requirements)
+Ensure you have the modules as stated in the [Quick Start Requirements](#requirements)
 
 There are more arguments you can pass in the command for different usages.
-- [-s (skip search and treat each argument as a link)](###-s)
-- [-p (download playlist)](###-p)
-- [-d (download video)](###-d)
+- [-s (skip search and treat each argument as a link)](#-s)
+- [-p (download playlist)](#-p)
+- [-d (download video)](#-d)
 
 ### -s
 This flag will treat each argument as a link and download from that link
