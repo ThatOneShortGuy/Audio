@@ -15,7 +15,10 @@ def get_album_cover(artist, title, album=None):
     term = title + ' ' + artist
     album = album or title
     print(f'searching for {term}')
-    genius = lg.Genius('-XL-7eL7uNl-uoKRfTExaJFlN_Lz9XRuOvyJ_AMDVIczzmQhY51xH75CJ3bIVY5W')
+    if not os.path.exists(os.path.dirname(os.path.realpath(__file__))+'/genius_token.txt'):
+        token = input('Please input your genius API token (one time): ')
+        open(os.path.dirname(os.path.realpath(__file__))+'/genius_token.txt', 'w').write(token)
+    genius = lg.Genius(open('genius_token.txt').read())
     genius.verbose = False
     song = genius.search_song(term, get_full_info=False)
     url = song.song_art_image_url

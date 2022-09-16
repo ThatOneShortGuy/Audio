@@ -7,13 +7,18 @@ Created on Tue Mar 30 16:01:42 2021
 import os
 import sys
 from threading import Thread
-
-import lxml.html
-import lyricsgenius as lg
-import pytube as pt
 import requests
-from ytmusicapi import YTMusic
+
 from volume_equalizer import equalize, to_ex
+
+import pytube as pt
+from ytmusicapi import YTMusic
+try:
+    import lyricsgenius as lg
+    genius_installed = True
+except:
+    print('Failed to import lyricsgenius, metadata will not be added to songs.')
+    genius_installed = False
 
 
 def remove_to(inp_text, removal):
@@ -23,6 +28,7 @@ def remove_to(inp_text, removal):
 
 
 def replace(string, li, wit):
+    '''Replaces all instances in an iterable li with a string wit in a string.'''
     for i in li:
         string = string.replace(i, wit)
     return string
@@ -49,10 +55,13 @@ def video_to_mp3(file_name, equal=False, artist=None, title=None, cover_art=None
             sys.exit(err)
         os.remove(file_name)
         if equal:
-            file_name = equalize(filedir+'.wav', (artist, album_artist), title)
+            try:
+                file_name = equalize(filedir+'.wav', (artist, album_artist), title)
+            except:
+                print('Failed to equalize volume. Likely librosa or soundfile is not installed. Continuing...')
         file_name = to_ex(file_name, '.mp3', (artist, album_artist), title)
         print(f'{title} Successfully converted to MP3!')
-        if cover_art:
+        if cover_art and genius_installed:
             try:
                 import eyed3
                 import eyed3.id3
@@ -62,11 +71,12 @@ def video_to_mp3(file_name, equal=False, artist=None, title=None, cover_art=None
 
             from download_images import get_album_cover
             try:
-                cover, site, ids = get_album_cover(album_artist, title)
+                cover, _, ids = get_album_cover(album_artist, title)
                 audiofile = eyed3.load(file_name)
-                site = lxml.html.fromstring(requests.get(site).content)
-                genius = lg.Genius(
-                    '-XL-7eL7uNl-uoKRfTExaJFlN_Lz9XRuOvyJ_AMDVIczzmQhY51xH75CJ3bIVY5W')
+                if not os.path.exists(os.path.dirname(os.path.realpath(__file__))+'/genius_token.txt'):
+                    token = input('Please input your genius API token (one time): ')
+                    open(os.path.dirname(os.path.realpath(__file__))+'/genius_token.txt', 'w').write(token)
+                genius = lg.Genius(open('genius_token.txt').read())
                 song = genius.song(ids)['song']
                 try:
                     album = song['album']['name']
@@ -321,12 +331,12 @@ if __name__ == '__main__':
             playlist_to_mp3(sys.argv[2], sys.argv[-1])
             links = ()
         elif sys.argv[1] == '-d':
-            if sys.argv[2] == '-a':
-                youtube_to_mp3(sys.argv[3], sys.argv[-1])
-            elif sys.argv[2][0] == '-':
-                download_video(sys.argv[3], sys.argv[-1], vformat=sys.argv[2][1:])
+            if sys.argv[2][0] == '-':
+                for link in sys.argv[3:-1]:
+                    download_video(link, sys.argv[-1], vformat=sys.argv[2][1:])
             else:
-                download_video(sys.argv[2], sys.argv[-1])
+                for link in sys.argv[2:-1]:
+                    download_video(link, sys.argv[-1])
             links = ()
         else:
             links = search(sys.argv[1:-1])
