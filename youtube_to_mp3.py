@@ -321,11 +321,11 @@ def search(terms):
 
 
 if __name__ == '__main__':
-    # sys.argv.extend(['-d', '-a', 'https://www.youtube.com/watch?v=amGldFHsCcU', 'D:/Music'])
+    # sys.argv.extend(['-s', 'youtube.com/watch?v=asuUo3o-BEg', 'D:/Music'])
     os.chdir(os.path.dirname(__file__))
     if len(sys.argv) > 1:
         if sys.argv[1] == '-s':
-            links = sys.argv[1:-1]
+            links = sys.argv[2:-1]
             file = sys.argv[-1]
         elif sys.argv[1] == '-p':
             playlist_to_mp3(sys.argv[2], sys.argv[-1])
