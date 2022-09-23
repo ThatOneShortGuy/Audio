@@ -8,6 +8,7 @@ import os
 import sys
 from threading import Thread
 import requests
+import traceback
 
 from volume_equalizer import equalize, to_ex
 
@@ -20,6 +21,7 @@ except:
     print('Failed to import lyricsgenius, metadata will not be added to songs.')
     genius_installed = False
 
+SELF_FILE = __file__
 
 def remove_to(inp_text, removal):
     for i in range(len(inp_text)-len(removal)):
@@ -73,9 +75,9 @@ def video_to_mp3(file_name, equal=False, artist=None, title=None, cover_art=None
             try:
                 cover, _, ids = get_album_cover(album_artist, title)
                 audiofile = eyed3.load(file_name)
-                if not os.path.exists(os.path.dirname(os.path.realpath(__file__))+'/genius_token.txt'):
+                if not os.path.exists(os.path.dirname(os.path.realpath(SELF_FILE))+'/genius_token.txt'):
                     token = input('Please input your genius API token (one time): ')
-                    open(os.path.dirname(os.path.realpath(__file__))+'/genius_token.txt', 'w').write(token)
+                    open(os.path.dirname(os.path.realpath(SELF_FILE))+'/genius_token.txt', 'w').write(token)
                 genius = lg.Genius(open('genius_token.txt').read())
                 song = genius.song(ids)['song']
                 try:
@@ -110,6 +112,7 @@ def video_to_mp3(file_name, equal=False, artist=None, title=None, cover_art=None
                 audiofile.tag.save()  # version=eyed3.id3.ID3_V2_3)
             except Exception as e:
                 print(f'Failed to add add metadata for {title} due to: {e}')
+                traceback.print_exc()
         return file+'.mp3'
     except OSError as err:
         print(err)
@@ -322,7 +325,7 @@ def search(terms):
 
 if __name__ == '__main__':
     # sys.argv.extend(['-s', 'youtube.com/watch?v=asuUo3o-BEg', 'D:/Music'])
-    os.chdir(os.path.dirname(__file__))
+    os.chdir(os.path.dirname(SELF_FILE))
     if len(sys.argv) > 1:
         if sys.argv[1] == '-s':
             links = sys.argv[2:-1]
