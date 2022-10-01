@@ -23,6 +23,7 @@ except:
 
 SELF_FILE = __file__
 
+
 def remove_to(inp_text, removal):
     for i in range(len(inp_text)-len(removal)):
         if inp_text[i:i+len(removal)] == removal:
@@ -324,7 +325,7 @@ def search(terms):
 
 
 if __name__ == '__main__':
-    # sys.argv.extend(['-s', 'youtube.com/watch?v=asuUo3o-BEg', 'D:/Music'])
+    # sys.argv.extend(['Cosplay Shawty indxgo', 'D:/Music'])
     os.chdir(os.path.dirname(SELF_FILE))
     if len(sys.argv) > 1:
         if sys.argv[1] == '-s':

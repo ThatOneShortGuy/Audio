@@ -21,6 +21,9 @@ def get_album_cover(artist, title, album=None):
     genius = lg.Genius(open('genius_token.txt').read())
     genius.verbose = False
     song = genius.search_song(term, get_full_info=False)
+    if type(song) == type(None):
+        term = artist + ' ' + title
+        song = genius.search_song(term, get_full_info=False)
     url = song.song_art_image_url
     site = song.url
     ids = song.api_path.split('/')[-1]
@@ -47,6 +50,6 @@ def download(url, name):
 
 
 if __name__ == '__main__':
-    artist = "Shiki-TMNS"
-    title = 'Anime Bitch'
+    artist = "Indxgo"
+    title = 'Cosplay Shawty'
     get_album_cover(artist, title)
