@@ -24,9 +24,15 @@ def get_album_cover(artist, title, album=None):
     if type(song) == type(None):
         term = artist + ' ' + title
         song = genius.search_song(term, get_full_info=False)
-    url = song.song_art_image_url
-    site = song.url
-    ids = song.api_path.split('/')[-1]
+    if type(song) == type(None):
+        song = genius.search_songs(term)['hits'][0]['result']
+        url = song['song_art_image_url']
+        site = song['url']
+        ids = song['api_path'].split('/')[-1]
+    else:
+        url = song.song_art_image_url
+        site = song.url
+        ids = song.api_path.split('/')[-1]
     if not os.path.exists('images'):
         os.mkdir('images')
     if os.path.exists(path := f'images/{album}.jpg'):

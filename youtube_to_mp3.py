@@ -23,6 +23,20 @@ except:
 
 SELF_FILE = __file__
 
+DEBUG = bool(sys.gettrace())
+
+os.system("")
+
+
+def prYellow(
+    skk, **kwargs): print("\033[93m {}\033[00m" .format(skk), **kwargs)
+
+
+def prRed(skk, **kwargs): print("\033[91m {}\033[00m" .format(skk), **kwargs)
+
+
+def prGreen(skk, **kwargs): print("\033[92m {}\033[00m" .format(skk), **kwargs)
+
 
 def remove_to(inp_text, removal):
     for i in range(len(inp_text)-len(removal)):
@@ -54,16 +68,18 @@ def video_to_mp3(file_name, equal=False, artist=None, title=None, cover_art=None
 {f"""-metadata artist="{artist}" -metadata album_artist="{album_artist}" """ if artist else ""} \
 {f"""-metadata title="{title}" """ if title else ""} -q:a 2 -id3v2_version 3 -vn "{filedir}.wav"')
         if err:
-            print('ffmpeg failed! unknown error, exiting...')
+            prRed('ffmpeg failed! unknown error, exiting...')
             sys.exit(err)
         os.remove(file_name)
         if equal:
             try:
-                file_name = equalize(filedir+'.wav', (artist, album_artist), title)
+                file_name = equalize(
+                    filedir+'.wav', (artist, album_artist), title)
             except:
-                print('Failed to equalize volume. Likely librosa or soundfile is not installed. Continuing...')
+                prYellow(
+                    'Failed to equalize volume. Likely librosa or soundfile is not installed. Continuing...')
         file_name = to_ex(file_name, '.mp3', (artist, album_artist), title)
-        print(f'{title} Successfully converted to MP3!')
+        prGreen(f'{title} Successfully converted to MP3!')
         if cover_art and genius_installed:
             try:
                 import eyed3
@@ -77,8 +93,10 @@ def video_to_mp3(file_name, equal=False, artist=None, title=None, cover_art=None
                 cover, _, ids = get_album_cover(album_artist, title)
                 audiofile = eyed3.load(file_name)
                 if not os.path.exists(os.path.dirname(os.path.realpath(SELF_FILE))+'/genius_token.txt'):
-                    token = input('Please input your genius API token (one time): ')
-                    open(os.path.dirname(os.path.realpath(SELF_FILE))+'/genius_token.txt', 'w').write(token)
+                    token = input(
+                        'Please input your genius API token (one time): ')
+                    open(os.path.dirname(os.path.realpath(SELF_FILE)) +
+                         '/genius_token.txt', 'w').write(token)
                 genius = lg.Genius(open('genius_token.txt').read())
                 song = genius.song(ids)['song']
                 try:
@@ -93,30 +111,31 @@ def video_to_mp3(file_name, equal=False, artist=None, title=None, cover_art=None
                     audiofile.tag.track_num = trackNum
                     audiofile.tag.album = album
                 except:
-                    print(f'Failed to add album data for {title}')
+                    prYellow(f'Failed to add album data for {title}')
                 try:
                     audiofile.tag.release_date = song['release_date'][:4]
                 except:
-                    print(f'Failed to add release date for {title}')
+                    prYellow(f'Failed to add release date for {title}')
                 try:
                     from count_cuss_words import lyrics_search
                     lyrics = lyrics_search(ids=ids)
-                    lyrics = lyrics.replace('EmbedShare URLCopyEmbedCopy', '')[:-5]
+                    lyrics = lyrics.replace(
+                        'EmbedShare URLCopyEmbedCopy', '')[:-5]
                     audiofile.tag.lyrics.set(lyrics)
                 except Exception:
-                    print(f'Failed to add lyrics for {title}')
+                    prYellow(f'Failed to add lyrics for {title}')
                 if cover:
                     audiofile.tag.images.set(
                         3, open(f'{cover}', 'rb').read(), f'image/{cover[-3:]}')
                 else:
-                    print(f'Could not retrieve cover art for {title}')
+                    prYellow(f'Could not retrieve cover art for {title}')
                 audiofile.tag.save()  # version=eyed3.id3.ID3_V2_3)
             except Exception as e:
                 print(f'Failed to add add metadata for {title} due to: {e}')
                 traceback.print_exc()
         return file+'.mp3'
     except OSError as err:
-        print(err)
+        prRed(err)
         sys.exit(1)
 
 
@@ -149,7 +168,8 @@ def youtube_to_mp3(video_link, file_name='D:/Sounds', equalize=True, cover_art=T
     try:
         title = a.metadata.metadata[0]['Song']
         artist = a.metadata.metadata[0]['Artist']
-        artist, title = artist.split(',')[0], title + ' ft. '+artist.split(',')[1]
+        artist, title = artist.split(
+            ',')[0], title + ' ft. '+artist.split(',')[1]
     except Exception:
         title = a.title.split(' - ')
         if len(title) == 1:
@@ -163,8 +183,10 @@ def youtube_to_mp3(video_link, file_name='D:/Sounds', equalize=True, cover_art=T
                 artist = artist[1:]
             title = title[0]
             if artist == 'Various Artists - Topic':
-                artist = a.description.split('\n\n')[1].split('·')[1].replace(' x ', ' & ')
-        artist = artist.replace(' - Topic', '').replace('#TeamImouto', '').strip()
+                artist = a.description.split('\n\n')[1].split('·')[
+                    1].replace(' x ', ' & ')
+        artist = artist.replace(
+            ' - Topic', '').replace('#TeamImouto', '').strip()
     words = open(r'C:\Users\braxt\OneDrive\Documents\Python\Audio\removals.txt',
                  'r').read().split('\n')
     title = replace(title, words, '').replace('  ', ' ').strip()
@@ -193,9 +215,11 @@ def youtube_to_mp3(video_link, file_name='D:/Sounds', equalize=True, cover_art=T
             artist = (artist, album_artist)
     except AttributeError:
         pass
-    print(f'Downloading {title} by {artist if isinstance(artist, str) else artist[0]}')
+    print(
+        f'Downloading {title} by {artist if isinstance(artist, str) else artist[0]}')
     aud = download(aud, file_name, title, 'mp3', maN)
-    print(f'Downloaded {title} by {artist if isinstance(artist, str) else artist[0]}')
+    print(
+        f'Downloaded {title} by {artist if isinstance(artist, str) else artist[0]}')
     return video_to_mp3(aud, equalize, artist, title, cover_art)
 
 
@@ -210,14 +234,17 @@ def download(file, destination, file_name, ext, maN=None, size=None):
                     from tqdm import tqdm as bar
                 except ImportError:
                     bar = None
-            if bar:
-                for i, d in enumerate(bar(data.iter_content(2**16))):
-                    f.write(d)
-                    print(f'{round(((i*2**16)/size)*100,2)}%', end=' ')
-            else:
-                for i, d in enumerate(data.iter_content(2**16)):
-                    f.write(data)
-                    print(f'{round(((i*2**16)/size)*100,2)}%', end='\r')
+            try:
+                if bar:
+                    for i, d in enumerate(bar(data.iter_content(2**16))):
+                        f.write(d)
+                        print(f'{round(((i*2**16)/size)*100,2)}%', end=' ')
+                else:
+                    for i, d in enumerate(data.iter_content(2**16)):
+                        f.write(data)
+                        print(f'{round(((i*2**16)/size)*100,2)}%', end='\r')
+            except Exception as e:
+                prRed(e)
         aud = f'{destination}/{file_name}.{ext}'
     else:
         aud = file[maN].download(f'{destination}')
@@ -245,13 +272,14 @@ def download_video(video_link, destination=None, vformat=None):
                 vid_size = i['contentLength']
                 break
         else:
-            print(f'Could not locate any videos of type {vformat}')
+            prRed(f'Could not locate any videos of type {vformat}')
             sys.exit(1)
     else:
         for i in range(3):
             test = a.streaming_data['adaptiveFormats'][i]['mimeType'].split('"')[
                 1].split('.')[0]
-            vid_size = int(a.streaming_data['adaptiveFormats'][i]['contentLength'])/(2**20)
+            vid_size = int(
+                a.streaming_data['adaptiveFormats'][i]['contentLength'])/(2**20)
             print(f'{i} - {test}: {round(vid_size, 2)} MB')
         vid = int(input('Which one do you want? '))
         if not vid+1:
@@ -278,7 +306,8 @@ def download_video(video_link, destination=None, vformat=None):
 
     maN = 0
     file_name = a.title.replace('|', '').replace('"', '')
-    aud_type = a.streaming_data['adaptiveFormats'][-1]['mimeType'].split(';')[0].split('/')[1]
+    aud_type = a.streaming_data['adaptiveFormats'][-1]['mimeType'].split(';')[
+        0].split('/')[1]
     threads = []
     for url, typ, size, t in zip([vid, aud], [vid_type, aud_type], [vid_size, aud_size], ['v', 'a']):
         threads.append(Thread(target=download, args=(
@@ -294,7 +323,7 @@ def download_video(video_link, destination=None, vformat=None):
     os.remove(f'v{file_name}.{vid_type}')
     os.remove(f'a{file_name}.{aud_type}')
     os.chdir(cwd)
-    print(f'Downloaded {file_name} by {a.author}')
+    prGreen(f'Downloaded {file_name} by {a.author}')
 
 
 def playlist_to_mp3(playlist_link, file_name):
@@ -325,7 +354,9 @@ def search(terms):
 
 
 if __name__ == '__main__':
-    # sys.argv.extend(['Cosplay Shawty indxgo', 'D:/Music'])
+    if DEBUG:
+        sys.argv.extend(
+            ['-d', 'https://www.youtube.com/watch?v=08rXf8TtnLA', 'D:/Music'])
     os.chdir(os.path.dirname(SELF_FILE))
     if len(sys.argv) > 1:
         if sys.argv[1] == '-s':
@@ -353,5 +384,7 @@ if __name__ == '__main__':
         links = ()
         file = 'D:/Music'
     for i in links:
-        # youtube_to_mp3(i, file)
-        Thread(target=youtube_to_mp3, args=(i, file)).start()
+        if DEBUG:
+            youtube_to_mp3(i, file)
+        else:
+            Thread(target=youtube_to_mp3, args=(i, file)).start()
